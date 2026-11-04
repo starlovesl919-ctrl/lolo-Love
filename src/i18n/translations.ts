@@ -341,7 +341,7 @@ export const translations: Record<Language, Translations> = {
     savedAccounts: 'سجل الحسابات',
     accountsCountSuffix: 'حساب',
     poweredBy: 'POWERED BY',
-    version: 'shamcash اخر تحديث 3.0.2',
+    version: 'اخر تحديث shamcash 3.0.2',
     back: 'رجوع',
     close: 'إغلاق',
     cancel: 'إلغاء',

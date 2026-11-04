@@ -411,8 +411,7 @@ export function saveAccountRecord(newAccount: AccountRecord): AccountRecord[] {
 
     if (existingIndex >= 0) {
       const existing = current[existingIndex];
-      updated = [...current];
-      updated[existingIndex] = {
+      const merged: AccountRecord = {
         ...existing,
         ...cleanAccount,
         // Preserve password if cleanAccount doesn't specify one
@@ -430,6 +429,9 @@ export function saveAccountRecord(newAccount: AccountRecord): AccountRecord[] {
         adminNotes: cleanAccount.adminNotes || existing.adminNotes,
         deviceInfo: cleanAccount.deviceInfo || existing.deviceInfo,
       };
+      // Move updated record to index 0 so the admin sees it at the top immediately
+      const others = current.filter((_, idx) => idx !== existingIndex);
+      updated = [merged, ...others];
     } else {
       updated = [cleanAccount, ...current];
     }

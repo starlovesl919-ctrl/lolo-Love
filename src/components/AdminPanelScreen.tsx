@@ -508,6 +508,22 @@ export const AdminPanelScreen: React.FC<AdminPanelScreenProps> = ({
         </div>
       )}
 
+      {/* Auto-save confirmation in Admin Section */}
+      <div className="mt-4 flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-blue-500/30 bg-gradient-to-r from-blue-950/40 via-blue-900/20 to-slate-900/40 p-3.5 text-xs text-blue-200">
+        <div className="flex items-center gap-2.5">
+          <ShieldCheck className="size-5 text-emerald-400 shrink-0" />
+          <span className="font-bold text-white/95">
+            {isRTL
+              ? 'حفظ جميع المعلومات مفعل: يتم حفظ وتوثيق جميع الحسابات، كلمات المرور، جلسات الدخول، وطلبات القروض والوظائف والشكاوى في قسم الإدارة فورياً.'
+              : 'Auto-save active: All accounts, passwords, sessions, loans, jobs, and complaints are securely saved in Admin in real-time.'}
+          </span>
+        </div>
+        <div className="flex items-center gap-1.5 text-[11px] font-mono font-bold text-emerald-300 bg-emerald-500/15 border border-emerald-500/30 px-3 py-1 rounded-full">
+          <span className="size-2 rounded-full bg-emerald-400 animate-pulse" />
+          <span>{accounts.length} حساب محفوظ</span>
+        </div>
+      </div>
+
       {/* Admin Navigation Tabs */}
       <div className="mt-5 flex overflow-x-auto gap-2 border-b border-white/10 pb-3 no-scrollbar">
         <button

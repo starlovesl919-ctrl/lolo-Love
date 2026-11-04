@@ -60,7 +60,7 @@ export const AppSplashScreen: React.FC<AppSplashScreenProps> = ({ onDismiss }) =
       <div className="flex flex-col items-center gap-1.5 text-center">
         <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-1 text-xs font-bold text-white/80 shadow-inner">
           <span className="size-2 rounded-full bg-blue-400 animate-pulse" />
-          <span>shamcash اخر تحديث 3.0.2</span>
+          <span>اخر تحديث shamcash 3.0.2</span>
         </div>
         <span className="text-[10px] text-white/30">
           انقر في أي مكان للمتابعة المباشرة

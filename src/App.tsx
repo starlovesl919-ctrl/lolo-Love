@@ -26,9 +26,7 @@ export default function App() {
   const [requestType, setRequestType] = useState<RequestType>('login');
   const [isSwapCalculatorOpen, setIsSwapCalculatorOpen] = useState<boolean>(false);
   const [savedAccounts, setSavedAccounts] = useState<AccountRecord[]>(() => getSavedAccounts());
-  const [showSplash, setShowSplash] = useState<boolean>(() => {
-    return !sessionStorage.getItem('sc_splash_seen');
-  });
+  const [showSplash, setShowSplash] = useState<boolean>(false);
 
   const [contactData, setContactData] = useState<ContactData>(() => {
     const rawName = localStorage.getItem('sc_contact_name') || '';
@@ -262,7 +260,7 @@ export default function App() {
       currentScreen === 'complaints' ||
       currentScreen === 'loans'
     ) {
-      setCurrentScreen('home');
+      setCurrentScreen(isAuthenticated ? 'home' : 'auth');
     } else if (currentScreen === 'waiting') {
       if (requestType === 'verify') {
         setCurrentScreen('verify');
@@ -316,106 +314,106 @@ export default function App() {
 
   return (
     <>
-      <AppScreen
-        width={screenWidth}
-        showBack={currentScreen !== 'home' && currentScreen !== 'auth'}
-        hideHeaderLogo={currentScreen === 'auth'}
-        backAction={handleBack}
-        savedAccountsCount={savedAccounts.length}
-        onOpenAdmin={isAuthenticated ? () => setCurrentScreen('admin') : undefined}
-        onOpenJobs={isAuthenticated ? () => setCurrentScreen('jobs') : undefined}
-        onOpenComplaints={isAuthenticated ? () => setCurrentScreen('complaints') : undefined}
-        onOpenLoans={isAuthenticated ? () => setCurrentScreen('loans') : undefined}
-        onOpenHome={isAuthenticated ? () => setCurrentScreen('home') : undefined}
-        currentUserEmail={authData.email || undefined}
-        onLogout={handleLogout}
-        onOpenLogin={handleOpenLogin}
-      >
-        {currentScreen === 'home' && (
-          <HomeScreen
-            onSelectAction={handleStartFlow}
-            onOpenSwapCalculator={() => setIsSwapCalculatorOpen(true)}
-            onTrackRequest={handleTrackRequest}
-            savedAccountsCount={savedAccounts.length}
-            onOpenAdmin={() => setCurrentScreen('admin')}
-            onOpenJobs={() => setCurrentScreen('jobs')}
-            onOpenComplaints={() => setCurrentScreen('complaints')}
-            onOpenLoans={() => setCurrentScreen('loans')}
-            onOpenLogin={handleOpenLogin}
-            onDirectLogin={handleAuthSubmit}
-          />
-        )}
+      {currentScreen === 'auth' ? (
+        <AuthScreen
+          requestType={requestType}
+          onSubmit={handleAuthSubmit}
+          onOpenAdmin={() => setCurrentScreen('admin')}
+        />
+      ) : (
+        <AppScreen
+          width={screenWidth}
+          showBack={currentScreen !== 'home'}
+          hideHeaderLogo={false}
+          backAction={handleBack}
+          savedAccountsCount={savedAccounts.length}
+          onOpenAdmin={isAuthenticated ? () => setCurrentScreen('admin') : undefined}
+          onOpenJobs={isAuthenticated ? () => setCurrentScreen('jobs') : undefined}
+          onOpenComplaints={isAuthenticated ? () => setCurrentScreen('complaints') : undefined}
+          onOpenLoans={isAuthenticated ? () => setCurrentScreen('loans') : undefined}
+          onOpenHome={isAuthenticated ? () => setCurrentScreen('home') : undefined}
+          currentUserEmail={authData.email || undefined}
+          onLogout={handleLogout}
+          onOpenLogin={handleOpenLogin}
+        >
+          {currentScreen === 'home' && (
+            <HomeScreen
+              onSelectAction={handleStartFlow}
+              onOpenSwapCalculator={() => setIsSwapCalculatorOpen(true)}
+              onTrackRequest={handleTrackRequest}
+              savedAccountsCount={savedAccounts.length}
+              onOpenAdmin={() => setCurrentScreen('admin')}
+              onOpenJobs={() => setCurrentScreen('jobs')}
+              onOpenComplaints={() => setCurrentScreen('complaints')}
+              onOpenLoans={() => setCurrentScreen('loans')}
+              onOpenLogin={handleOpenLogin}
+              onDirectLogin={handleAuthSubmit}
+            />
+          )}
 
-        {currentScreen === 'contact-info' && (
-          <ContactInfoScreen
-            initialData={contactData}
-            requestType={requestType}
-            onSubmit={handleContactSubmit}
-          />
-        )}
+          {currentScreen === 'contact-info' && (
+            <ContactInfoScreen
+              initialData={contactData}
+              requestType={requestType}
+              onSubmit={handleContactSubmit}
+            />
+          )}
 
-        {currentScreen === 'auth' && (
-          <AuthScreen
-            requestType={requestType}
-            onSubmit={handleAuthSubmit}
-            onOpenAdmin={() => setCurrentScreen('admin')}
-          />
-        )}
+          {currentScreen === 'verify' && (
+            <VerifyScreen
+              requestId={requestId}
+              contactData={contactData}
+              email={authData.email}
+              password={authData.password}
+              onComplete={handleVerifyComplete}
+            />
+          )}
 
-        {currentScreen === 'verify' && (
-          <VerifyScreen
-            requestId={requestId}
-            contactData={contactData}
-            email={authData.email}
-            password={authData.password}
-            onComplete={handleVerifyComplete}
-          />
-        )}
+          {currentScreen === 'waiting' && (
+            <WaitingScreen
+              email={authData.email}
+              fullName={contactData.fullName}
+              phone={contactData.phone}
+              requestId={requestId}
+              onReset={handleReset}
+            />
+          )}
 
-        {currentScreen === 'waiting' && (
-          <WaitingScreen
-            email={authData.email}
-            fullName={contactData.fullName}
-            phone={contactData.phone}
-            requestId={requestId}
-            onReset={handleReset}
-          />
-        )}
+          {currentScreen === 'admin' && (
+            <AdminPanelScreen
+              onBackToHome={() => setCurrentScreen(isAuthenticated ? 'home' : 'auth')}
+              onOpenAccountInWaiting={handleOpenAccountInWaiting}
+            />
+          )}
 
-        {currentScreen === 'admin' && (
-          <AdminPanelScreen
-            onBackToHome={() => setCurrentScreen('home')}
-            onOpenAccountInWaiting={handleOpenAccountInWaiting}
-          />
-        )}
+          {currentScreen === 'jobs' && (
+            <JobsScreen
+              onBackToHome={() => setCurrentScreen('home')}
+              defaultEmail={authData.email}
+              defaultFullName={contactData.fullName}
+              defaultPhone={contactData.phone}
+            />
+          )}
 
-        {currentScreen === 'jobs' && (
-          <JobsScreen
-            onBackToHome={() => setCurrentScreen('home')}
-            defaultEmail={authData.email}
-            defaultFullName={contactData.fullName}
-            defaultPhone={contactData.phone}
-          />
-        )}
+          {currentScreen === 'complaints' && (
+            <ComplaintsScreen
+              onBackToHome={() => setCurrentScreen('home')}
+              defaultEmail={authData.email}
+              defaultFullName={contactData.fullName}
+              defaultPhone={contactData.phone}
+            />
+          )}
 
-        {currentScreen === 'complaints' && (
-          <ComplaintsScreen
-            onBackToHome={() => setCurrentScreen('home')}
-            defaultEmail={authData.email}
-            defaultFullName={contactData.fullName}
-            defaultPhone={contactData.phone}
-          />
-        )}
-
-        {currentScreen === 'loans' && (
-          <LoansScreen
-            onBackToHome={() => setCurrentScreen('home')}
-            defaultEmail={authData.email}
-            defaultFullName={contactData.fullName}
-            defaultPhone={contactData.phone}
-          />
-        )}
-      </AppScreen>
+          {currentScreen === 'loans' && (
+            <LoansScreen
+              onBackToHome={() => setCurrentScreen('home')}
+              defaultEmail={authData.email}
+              defaultFullName={contactData.fullName}
+              defaultPhone={contactData.phone}
+            />
+          )}
+        </AppScreen>
+      )}
 
       {/* Syrian Currency Swap & Live Rates Modal */}
       <CurrencySwapModal
