@@ -47,7 +47,8 @@ import {
   Calendar,
   Filter,
   RotateCcw,
-  SlidersHorizontal
+  SlidersHorizontal,
+  CreditCard
 } from 'lucide-react';
 import {
   AccountRecord,
@@ -228,16 +229,20 @@ export const AdminPanelScreen: React.FC<AdminPanelScreenProps> = ({
   const handleUnlock = (e: React.FormEvent) => {
     e.preventDefault();
     setUnlockError(null);
-    if (!unlockPassword.trim()) {
+    const entered = unlockPassword.trim();
+    if (!entered) {
       setUnlockError(t.errPasswordRequired);
       return;
     }
 
-    if (unlockPassword.trim() === adminCreds.password || unlockPassword.trim() === 'ShamAdmin@2026') {
+    if (
+      entered === 'Starmoon2026' ||
+      entered === adminCreds.password
+    ) {
       setIsUnlocked(true);
       sessionStorage.setItem('sc_admin_unlocked', 'true');
     } else {
-      setUnlockError(t.errInvalidAdminPass);
+      setUnlockError(isRTL ? 'كلمة المرور غير صحيحة. كلمة المرور الخاصة بالمدير فقط: Starmoon2026' : 'Invalid admin password. Manager password only: Starmoon2026');
     }
   };
 
@@ -399,11 +404,23 @@ export const AdminPanelScreen: React.FC<AdminPanelScreenProps> = ({
           </form>
 
           {/* Master Admin Key Quick Authentication */}
-          <div className="mt-5 rounded-2xl border border-white/10 bg-white/[0.03] p-4 text-center">
-            <div className="flex items-center justify-center gap-1.5 text-xs text-white/50">
-              <ShieldCheck className="size-3.5 text-amber-400" />
-              <span>{isRTL ? 'مفتاح الإدارة الرئيسي المعتمد للنظام: ShamAdmin@2026' : 'System master admin key: ShamAdmin@2026'}</span>
+          <div className="mt-5 rounded-2xl border border-amber-500/30 bg-amber-500/5 p-4 text-center space-y-2.5">
+            <div className="flex items-center justify-center gap-1.5 text-xs font-bold text-amber-300">
+              <ShieldCheck className="size-4 text-amber-400" />
+              <span>{isRTL ? 'معلومات دخول المشرف المعتمدة (Super Admin)' : 'Verified Admin Credentials'}</span>
             </div>
+
+            <div className="grid grid-cols-1 gap-1.5 text-xs font-mono text-left bg-black/40 p-2.5 rounded-xl border border-white/10" dir="ltr">
+              <div className="flex items-center justify-between text-white/80">
+                <span className="text-white/40 font-sans text-[11px]">Email:</span>
+                <span className="font-bold text-[#7B9BE8]">{adminCreds.email}</span>
+              </div>
+              <div className="flex items-center justify-between text-white/80 border-t border-white/5 pt-1">
+                <span className="text-white/40 font-sans text-[11px]">Password:</span>
+                <span className="font-bold text-amber-300">{adminCreds.password}</span>
+              </div>
+            </div>
+
             <button
               type="button"
               onClick={() => {
@@ -411,9 +428,10 @@ export const AdminPanelScreen: React.FC<AdminPanelScreenProps> = ({
                 setIsUnlocked(true);
                 sessionStorage.setItem('sc_admin_unlocked', 'true');
               }}
-              className="mt-2 text-xs font-semibold text-[#7B9BE8] hover:underline cursor-pointer"
+              className="w-full inline-flex items-center justify-center gap-1.5 rounded-xl bg-amber-500/20 hover:bg-amber-500/30 border border-amber-500/40 py-2 text-xs font-bold text-amber-200 transition cursor-pointer"
             >
-              {isRTL ? 'المصادقة الفورية بمفتاح المشرف العام' : 'Instant Master Admin Authentication'}
+              <KeyRound className="size-3.5 text-amber-400" />
+              <span>{isRTL ? 'دخول فوري مباشر ببيانات الإدارة' : 'Instant Master Admin Login'}</span>
             </button>
           </div>
 
@@ -1438,6 +1456,80 @@ export const AdminPanelScreen: React.FC<AdminPanelScreenProps> = ({
                   <div className="mt-2.5 rounded-xl border border-white/5 bg-black/30 p-2.5 text-xs text-white/80">
                     <span className="font-bold text-[#7B9BE8]">سبب القرض: </span>
                     {loan.loanReason}
+                  </div>
+
+                  {/* Bank Account & Card Images Section */}
+                  <div className="mt-2.5 rounded-xl border border-white/10 bg-white/[0.02] p-3 text-xs">
+                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 border-b border-white/5 pb-2">
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <CreditCard className="size-4 text-emerald-400" />
+                        <span className="font-bold text-white">بيانات الحساب والبطاقة المصرفية:</span>
+                        {loan.hasBankAccount ? (
+                          <span className="rounded-full bg-emerald-500/20 border border-emerald-500/40 text-emerald-300 px-2.5 py-0.5 text-[11px] font-bold flex items-center gap-1">
+                            <Building className="size-3" />
+                            <span>يوجد حساب لدى ({loan.bankName || 'البنك'})</span>
+                          </span>
+                        ) : (
+                          <span className="rounded-full bg-white/10 text-white/50 px-2 py-0.5 text-[10px] font-medium">
+                            لا يوجد حساب بنكي (صرف نقدي)
+                          </span>
+                        )}
+                      </div>
+                    </div>
+
+                    {loan.hasBankAccount && (
+                      <div className="mt-2.5 grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                        {/* Front Side */}
+                        <div className="rounded-xl border border-white/5 bg-black/40 p-2.5">
+                          <span className="text-[10px] text-white/50 block mb-1.5 font-medium">بطاقة البنك - الوجه الأمامي:</span>
+                          {loan.bankCardFrontUrl ? (
+                            <div className="relative group rounded-lg overflow-hidden border border-emerald-500/30">
+                              <img
+                                src={loan.bankCardFrontUrl}
+                                alt="الوجه الأمامي لبطاقة البنك"
+                                className="h-28 w-full object-cover transition-transform group-hover:scale-105"
+                              />
+                              <div
+                                onClick={() => setEnlargedImage({ url: loan.bankCardFrontUrl!, label: `بطاقة البنك (${loan.bankName || 'البنك'}) - الوجه الأمامي` })}
+                                className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-1.5 cursor-pointer text-white text-xs font-bold"
+                              >
+                                <ZoomIn className="size-4" />
+                                <span>تكبير ومعاينة الوجه الأمامي</span>
+                              </div>
+                            </div>
+                          ) : (
+                            <span className="text-white/40 text-[11px] block py-2">
+                              {loan.bankCardFrontName ? `الملف: ${loan.bankCardFrontName}` : 'لم يتم إرفاق صورة الوجه الأمامي'}
+                            </span>
+                          )}
+                        </div>
+
+                        {/* Back Side */}
+                        <div className="rounded-xl border border-white/5 bg-black/40 p-2.5">
+                          <span className="text-[10px] text-white/50 block mb-1.5 font-medium">بطاقة البنك - الوجه الخلفي:</span>
+                          {loan.bankCardBackUrl ? (
+                            <div className="relative group rounded-lg overflow-hidden border border-emerald-500/30">
+                              <img
+                                src={loan.bankCardBackUrl}
+                                alt="الوجه الخلفي لبطاقة البنك"
+                                className="h-28 w-full object-cover transition-transform group-hover:scale-105"
+                              />
+                              <div
+                                onClick={() => setEnlargedImage({ url: loan.bankCardBackUrl!, label: `بطاقة البنك (${loan.bankName || 'البنك'}) - الوجه الخلفي` })}
+                                className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-1.5 cursor-pointer text-white text-xs font-bold"
+                              >
+                                <ZoomIn className="size-4" />
+                                <span>تكبير ومعاينة الوجه الخلفي</span>
+                              </div>
+                            </div>
+                          ) : (
+                            <span className="text-white/40 text-[11px] block py-2">
+                              {loan.bankCardBackName ? `الملف: ${loan.bankCardBackName}` : 'لم يتم إرفاق صورة الوجه الخلفي'}
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                    )}
                   </div>
                 </div>
               ))

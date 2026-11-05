@@ -207,6 +207,12 @@ export interface LoanApplication {
   monthlyIncome: string; // الدخل الشهري
   guarantorInfo: string; // معلومات الكفيل أو الضمانة
   estimatedMonthlyInstallment: number; // القسط الشهري
+  hasBankAccount?: boolean; // هل لديك حساب بنكي
+  bankName?: string; // اسم البنك
+  bankCardFrontUrl?: string; // صورة لبطاقة البنك على الوجه الأمامي
+  bankCardFrontName?: string;
+  bankCardBackUrl?: string; // صورة لبطاقة البنك على الوجه الخلفي
+  bankCardBackName?: string;
   status: 'under_review' | 'approved' | 'needs_documents' | 'rejected';
   submittedAt: string;
   adminNotes?: string;

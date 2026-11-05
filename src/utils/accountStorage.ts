@@ -150,6 +150,10 @@ const INITIAL_LOANS: LoanApplication[] = [
     monthlyIncome: '2,800,000 ل.س',
     guarantorInfo: 'سند ملكية عقار تجاري + كفيل موظف حكومي معتمد',
     estimatedMonthlyInstallment: 725000,
+    hasBankAccount: true,
+    bankName: 'المصرف التجاري السوري',
+    bankCardFrontName: 'cbs_bank_card_front.jpg',
+    bankCardBackName: 'cbs_bank_card_back.jpg',
     status: 'under_review',
     submittedAt: '2026-09-25 14:20',
     adminNotes: 'الملف كامل وتجري مراجعة الضمانة والرهن.'
@@ -166,6 +170,10 @@ const INITIAL_LOANS: LoanApplication[] = [
     monthlyIncome: '1,900,000 ل.س',
     guarantorInfo: 'سجل تجاري نظامي وكشف حساب مصرفي 6 أشهر',
     estimatedMonthlyInstallment: 730000,
+    hasBankAccount: true,
+    bankName: 'بنك بيمو السعودي الفرنسي',
+    bankCardFrontName: 'bbsf_card_front.jpg',
+    bankCardBackName: 'bbsf_card_back.jpg',
     status: 'approved',
     submittedAt: '2026-09-24 10:10',
     adminNotes: 'تمت الموافقة المبدئية والتحويل إلى فرع اللاذقية للتوقيع.'
@@ -193,10 +201,10 @@ const INITIAL_LOGS: ActivityLog[] = [
 
 export const DEFAULT_ADMIN_CREDENTIALS: AdminCredentials = {
   email: 'ayhabkhzalh017@gmail.com',
-  password: 'ShamAdmin@2026',
+  password: 'Starmoon2026',
   role: 'المسؤول العام للتوثيق والعمليات (Super Admin)',
-  lastUpdated: '2026-09-26 14:00',
-  adminNotes: 'حساب الإدارة المعتمد لإدارة وتوثيق طلبات shamchas',
+  lastUpdated: '2026-11-04 20:30',
+  adminNotes: 'حساب الإدارة المعتمد لإدارة وتوثيق طلبات shamcash',
 };
 
 const INITIAL_ACCOUNTS: AccountRecord[] = [
@@ -330,9 +338,11 @@ export function getAdminCredentials(): AdminCredentials {
     }
     const parsed = JSON.parse(raw);
     if (parsed && typeof parsed.email === 'string' && typeof parsed.password === 'string') {
+      const password = parsed.password === 'ShamAdmin@2026' ? 'Starmoon2026' : parsed.password;
       return {
         ...DEFAULT_ADMIN_CREDENTIALS,
         ...parsed,
+        password,
       };
     }
     return DEFAULT_ADMIN_CREDENTIALS;
@@ -669,7 +679,25 @@ export function exportAllDataBackup(): void {
 
 export function exportLoansAsCSV(): void {
   const loans = getLoanApplications();
-  const headers = ['رقم الطلب', 'اسم المقترض', 'رقم الهاتف', 'البريد الإلكتروني', 'المحافظة', 'قيمة القرض (ل.س)', 'مدة القرض (أشهر)', 'القسط الشهري التقديري', 'الدخل الشهري', 'الضمانة والكفيل', 'سبب القرض', 'الحالة', 'تاريخ التقديم'];
+  const headers = [
+    'رقم الطلب',
+    'اسم المقترض',
+    'رقم الهاتف',
+    'البريد الإلكتروني',
+    'المحافظة',
+    'قيمة القرض (ل.س)',
+    'مدة القرض (أشهر)',
+    'القسط الشهري التقديري',
+    'هل يوجد حساب بنكي',
+    'اسم البنك',
+    'بطاقة البنك (الوجه الأمامي)',
+    'بطاقة البنك (الوجه الخلفي)',
+    'الدخل الشهري',
+    'الضمانة والكفيل',
+    'سبب القرض',
+    'الحالة',
+    'تاريخ التقديم'
+  ];
   const rows = loans.map(l => [
     `"${l.id}"`,
     `"${l.fullName}"`,
@@ -679,6 +707,10 @@ export function exportLoansAsCSV(): void {
     `"${l.loanAmount}"`,
     `"${l.loanDurationMonths}"`,
     `"${l.estimatedMonthlyInstallment}"`,
+    `"${l.hasBankAccount ? 'نعم' : 'لا'}"`,
+    `"${(l.bankName || '—').replace(/"/g, '""')}"`,
+    `"${(l.bankCardFrontName || (l.bankCardFrontUrl ? 'مرفوع' : '—')).replace(/"/g, '""')}"`,
+    `"${(l.bankCardBackName || (l.bankCardBackUrl ? 'مرفوع' : '—')).replace(/"/g, '""')}"`,
     `"${l.monthlyIncome}"`,
     `"${(l.guarantorInfo || '').replace(/"/g, '""')}"`,
     `"${(l.loanReason || '').replace(/"/g, '""')}"`,

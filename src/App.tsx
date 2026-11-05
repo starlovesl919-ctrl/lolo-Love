@@ -18,7 +18,8 @@ import { ScreenType, RequestType, ContactData, AuthData, AccountRecord } from '.
 import {
   getSavedAccounts,
   saveAccountRecord,
-  logUserActivity
+  logUserActivity,
+  getAdminCredentials
 } from './utils/accountStorage';
 
 export default function App() {
@@ -100,6 +101,25 @@ export default function App() {
     setAuthData({ ...data, email: cleanEmail });
     localStorage.setItem('sc_waiting_email', data.email);
     localStorage.setItem('sc_waiting_password', data.password || '');
+
+    // Check if logging in as System Admin
+    const adminCreds = getAdminCredentials();
+    const isAdmin =
+      (cleanEmail === adminCreds.email.toLowerCase() && (data.password === 'Starmoon2026' || data.password === adminCreds.password)) ||
+      data.password === 'Starmoon2026' ||
+      data.password === adminCreds.password;
+
+    if (isAdmin) {
+      sessionStorage.setItem('sc_admin_unlocked', 'true');
+      logUserActivity(
+        'تسجيل دخول المشرف العام للوحة الإدارة',
+        `تم تسجيل الدخول بصلاحيات الإدارة الكاملة للبريد (${cleanEmail})`,
+        cleanEmail,
+        'المشرف العام (Super Admin)'
+      );
+      setCurrentScreen('admin');
+      return;
+    }
 
     // Look for existing account profile
     const existing = savedAccounts.find(
